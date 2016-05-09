@@ -1,0 +1,20 @@
+object DBDataModule: TDBDataModule
+  OldCreateOrder = False
+  Height = 59
+  HorizontalOffset = 406
+  VerticalOffset = 115
+  Width = 272
+  object IBConnection: TIBConnection
+    Connected = True
+    LoginPrompt = False
+    DatabaseName = 'C:\Users\User\Desktop\db\MYDB.FDB'
+    KeepConnection = False
+    Password = 'masterkey'
+    Transaction = DBForm.SQLTransaction
+    UserName = 'SYSDBA'
+    CharSet = 'UTF8'
+    Options = []
+    left = 48
+    top = 8
+  end
+end

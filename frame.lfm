@@ -1,0 +1,71 @@
+object Card: TCard
+  Left = 213
+  Height = 343
+  Top = 198
+  Width = 639
+  Caption = 'Card'
+  ClientHeight = 0
+  ClientWidth = 0
+  Color = clWindow
+  LCLVersion = '1.6.0.4'
+  object Panel: TPanel
+    Left = 0
+    Height = 96
+    Top = -96
+    Width = 0
+    Align = alBottom
+    Caption = ' '
+    ClientHeight = 96
+    ClientWidth = 0
+    TabOrder = 0
+    object Button1: TButton
+      Left = 64
+      Height = 25
+      Top = 40
+      Width = 75
+      Caption = 'Button1'
+      TabOrder = 0
+    end
+    object Button2: TButton
+      Left = 272
+      Height = 25
+      Top = 40
+      Width = 75
+      Caption = 'Button2'
+      TabOrder = 1
+    end
+    object Button3: TButton
+      Left = 488
+      Height = 25
+      Top = 40
+      Width = 75
+      Caption = 'Button3'
+      TabOrder = 2
+    end
+  end
+  object CPanel: TPanel
+    Left = 0
+    Height = 0
+    Top = 0
+    Width = 0
+    Align = alClient
+    TabOrder = 1
+  end
+  object SQLQuery: TSQLQuery
+    FieldDefs = <>
+    Database = DBDataModule.IBConnection
+    Transaction = DBForm.SQLTransaction
+    Options = []
+    Params = <>
+    left = 16
+  end
+  object DataSource: TDataSource
+    left = 56
+  end
+  object SQLTransaction: TSQLTransaction
+    Active = False
+    Database = DBDataModule.IBConnection
+    Options = []
+    left = 96
+  end
+end
