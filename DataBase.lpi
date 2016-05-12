@@ -9,7 +9,6 @@
       <Title Value="DataBase"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -39,7 +38,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="DataBase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -74,8 +73,14 @@
         <Filename Value="frame.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Card"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="uformcontainer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UFormContainer"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, main, metadata, Udatabase, directory, frame;
+  Forms, main, metadata, Udatabase, directory, frame, UFormContainer;
 
 {$R *.res}
 
@@ -16,8 +16,6 @@ begin
   Application.Initialize;
   Application.CreateForm(TMyForm, MyForm);
   Application.CreateForm(TDBDataModule, DBDataModule);
-  Application.CreateForm(TDBForm, DBForm);
-  Application.CreateForm(TCard, Card);
   Application.Run;
 end.
 

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, sqldb, db, FileUtil, Forms, Controls,
-  Graphics, Dialogs, Menus, DBGrids, Metadata, Udatabase, Directory;
+  Graphics, Dialogs, Menus, DBGrids, Metadata, Udatabase, Directory, frame;
 
 type
 
@@ -56,6 +56,7 @@ begin
   end;
   db := TDBDataModule.Create(self);
   DBConnection :=db.IBConnection;
+  SetLength(arrCard, 0);
 end;
 
 procedure TMyForm.MenuItemAboutClick(Sender: TObject);
@@ -73,7 +74,7 @@ var
   f: TDBForm;
 begin
   f := TDBForm.Create(self);
-  f.NewTable(DBConnection, TMenuItem(Sender).Name, TMenuItem(Sender).Caption, TMenuItem(Sender).Tag);
+  f.NewTable(TMenuItem(Sender).Name, TMenuItem(Sender).Caption, TMenuItem(Sender).Tag);
   f.Show();
 end;
 

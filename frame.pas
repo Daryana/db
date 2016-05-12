@@ -5,55 +5,162 @@ unit frame;
 interface
 
 uses
-  Classes, SysUtils, sqldb, db, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Metadata;
+  Classes, SysUtils, sqldb, FBEventMonitor, db, FileUtil, Forms, Controls,
+  Graphics, Dialogs, ExtCtrls, StdCtrls, DbCtrls, Metadata, Udatabase, UFormContainer;
 
 type
 
   { TCard }
 
-  TCard = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
+  TCard = class(TFormSQL)
+    BSave: TButton;
+    BExit: TButton;
     DataSource: TDataSource;
     Panel: TPanel;
     CPanel: TPanel;
     SQLQuery: TSQLQuery;
     SQLTransaction: TSQLTransaction;
+    procedure BExitClick(Sender: TObject);
+    procedure BSaveClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
   private
     { private declarations }
+    idTable: integer;
+    nameTable: string;
   public
     { public declarations }
-    //constructor Create(tbl: TTable); override;
+    procedure NewCard(tbl: TTable; id: integer);
+    procedure UpdateContent; override;
   end;
 
+    { TArrCard }
+
+    TArrCard = record
+      Table: string;
+      id: integer;
+    end;
 var
-  Card: TCard;
+  arrCard: array of TArrCard;
 
 implementation
 
 {$R *.lfm}
 
-{ TCard }
+{ TArrCard }
 
-                                  {
-constructor TCard.Create(tbl: TTable);
+
+procedure TCard.BSaveClick(Sender: TObject);
+begin
+  //ShowMessage(Datasource.DataSet.Fields.Fields[1].AsString);
+  Datasource.DataSet.FieldByName('id').Required := false;
+  SQLQuery.Post;
+  SQLQuery.ApplyUpdates;
+  FormContainer.UpdateContent;
+  close;
+end;
+
+procedure TCard.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i: integer;
-  b: TButton;
-  pl: TPanel;
-  edcondition: TEdit;
-  cbfilter: TCombobox;
-  cbValue: TCombobox;
+  b: Boolean;
 begin
-  inherited Create;
-  for i := 0 to Length(tbl) - 1 then
+  if idTable > -1 then
+  begin
+    b := False;
+    for i := 0 to High(arrCard) - 1 do
+    if (arrCard[i].Table = nameTable) and (arrCard[i].id = idTable) then b := True;
+    if b then
+    begin
+      arrCard[i].Table := arrCard[i + 1].Table;
+      arrCard[i].id := arrCard[i + 1].id;
+    end;
+    SetLength(arrCard, Length(arrCard) - 1);
+  end;
+end;
 
+procedure TCard.BExitClick(Sender: TObject);
+begin
+  close;
+end;
 
+{ TCard }
+//-1: не может существовать
+procedure TCard.NewCard(tbl: TTable; id: integer);
+var
+  i: integer;
+  pl: TPanel;
+  ed: TDBEdit;
+  lb: TLabel;
+  s: string;
+begin
+  idTable := id;
+  nameTable := tbl.name;
+  self.Caption := tbl.caption;
+  s :=  'SELECT ';
+  for i := 0 to  Length(tbl.fileds) - 1 do
+  begin
+    s += tbl.fileds[i].name;
+    if i < Length(tbl.fileds) - 1 then s += ', ';
+  end;
+  s +=  ' FROM ' + tbl.name + ' WHERE ID = ' + inttostr(id);
+  SQLQuery.SQL.Text := s;
+  s :=  'UPDATE ' + tbl.name + ' set ';
+  for i := 0 to  Length(tbl.fileds) - 1 do
+  begin
+    s += tbl.fileds[i].name + ' = :' + tbl.fileds[i].name;
+    if i < Length(tbl.fileds) - 1 then s += ', ';
+  end;
+  s += ' WHERE ID = ' + inttostr(id);
+  SQLQuery.UpdateSQL.Text := s;
+  s :=  'INSERT INTO ' + tbl.name + ' (';
+  for i := 0 to  Length(tbl.fileds) - 1 do
+  begin
+    s += tbl.fileds[i].name;
+    if i < Length(tbl.fileds) - 1 then s += ', '
+    else s += ')';
+  end;
+  s += ' VALUES (';
+  for i := 0 to  Length(tbl.fileds) - 1 do
+  begin
+    s += ' :' + tbl.fileds[i].name;
+    if i < Length(tbl.fileds) - 1 then s += ', '
+    else s += ')';
+  end;
+  SQLQuery.InsertSQL.Text := s;
+  UpdateContent;
+  for i := Length(tbl.fileds) - 1 downto 1 do
+  begin
+    pl := TPanel.Create(CPanel);
+    pl.Parent := CPanel;
+    Pl.Align := alTop;
+    pl.Height := 35;
+    lb := TLabel.Create(pl);
+    lb.Parent := pl;
+    lb.Top := 5 + pl.top;
+    lb.Height := 20;
+    lb.Width := 100;
+    lb.Left := 130;
+    lb.Caption := tbl.fileds[i].caption;
+    ed := TDBEdit.Create(pl);
+    ed.Parent := pl;
+    ed.Top := 5 + pl.top;
+    ed.Height := 20;
+    ed.Width := 100;
+    ed.Left := 240;
+    ed.DataSource := DataSource;
+    ed.DataField := tbl.fileds[i].name;
+  end;
+end;
 
+procedure TCard.UpdateContent;
+begin
+  SQLTransaction.CommitRetaining;
+  SQLQuery.Close;
+  SQLQuery.Open;
+  if idTable = -1 then SQLQuery.Append
+  else SQLQuery.Edit;
+end;
 
-end;     }
 
 end.
 

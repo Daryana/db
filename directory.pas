@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, sqldb, db, FileUtil, Forms, Controls, Graphics, Dialogs,
-  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons;
+  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons, frame, UFormContainer;
 
 type
 
@@ -28,7 +28,7 @@ type
 
   { TDBForm }
 
-  TDBForm = class(TForm)
+  TDBForm = class(TFormSQL)
     BtnPluse: TBitBtn;
     BtnDelete: TBitBtn;
     BtnCorrect: TBitBtn;
@@ -44,7 +44,8 @@ type
     procedure BtnDeleteClick(Sender: TObject);
     procedure BtnPluseClick(Sender: TObject);
     procedure ButtonClick(Sender: TObject);
-    procedure NewTable(DB: TDatabase; TableName, TableCaption: String; n: integer);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure NewTable(TableName, TableCaption: String; n: integer);
 
   private
     { private declarations }
@@ -57,11 +58,8 @@ type
     procedure ButClick(Sender: TObject);
   public
     { public declarations }
+    procedure UpdateContent; override;
   end;
-
-
-var
-  DBForm: TDBForm;
 
 
 implementation
@@ -85,7 +83,7 @@ end;
 
 { TDBForm }
 
-procedure TDBForm.NewTable(DB: TDatabase; TableName, TableCaption: String;
+procedure TDBForm.NewTable(TableName, TableCaption: String;
   n: integer);
 var
   s, t: string;
@@ -93,8 +91,6 @@ var
   b: boolean;
 begin
   self.Caption := TableCaption;
-  SQLTransaction.DataBase := DB;
-  SQLQuery.Transaction := SQLTransaction;
   s := 'SELECT ';
   b := true;
   t := '';
@@ -133,14 +129,8 @@ begin
   if b then s += '*';
   s +=  ' FROM ' + TableName + t;
   try
-    SQLQuery.Close;
     SQLQuery.SQL.Text := s;
-    SQLQuery.Open;
-    for i := 0 to Length(arrString) - 1 do
-    begin
-      DBGrid.Columns[i].Width := arrWight[i];
-      DBGrid.Columns[i].Title.Caption := arrString[i];
-    end;
+    UpdateContent;
   except
     on E: Exception do
     begin
@@ -162,31 +152,29 @@ begin
   s := SQLText;
   for i := 0 to Length(arrFilter) - 1 do
   begin
-    if ((idTable.fileds[arrFilter[i].cbfilter.ItemIndex].name <> 'Фильтр') and
-    (arrFilter[i].cbValue.Caption <> '') and
-    (arrFilter[i].edcondition.text <> '')) then
+    if (arrFilter[i].cbfilter.caption + arrFilter[i].cbValue.Caption + arrFilter[i].edcondition.text) <> '' then
+    begin
       if (s = SQLText) then s += ' WHERE '
       else s += ' AND ';
     if idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link = -1 then
-      s += idTable.name + '.' + idTable.fileds[arrFilter[i].cbfilter.ItemIndex].name + ' ' +
-        arrFilter[i].cbValue.Caption + ' ' + arrFilter[i].edcondition.text
+      s += idTable.name + '.' + idTable.fileds[arrFilter[i].cbfilter.ItemIndex].name
     else
       s += TimeTable.Tables[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name + '.' +
-        idTable.fileds[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name + ' ' +
-        arrFilter[i].cbValue.Caption + ' ' + arrFilter[i].edcondition.text;
+        idTable.fileds[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name;
+    s += ' ' + arrFilter[i].cbValue.Caption + ' :p' + inttostr(i);
+    end;
   end;
-
-  {при генирации запроса вместо значений подставляется имя параметра и потом sql.prepere, params(param by name), и туда введенное пользователем. open.}
-
   try
     SQLQuery.Close;
     SQLQuery.SQL.Text := s;
-    ShowMessage(s);
+    for i := 0 to Length(arrFilter) - 1 do
+      if (arrFilter[i].cbfilter.caption + arrFilter[i].cbValue.Caption + arrFilter[i].edcondition.text) <> '' then
+          SQLQuery.ParamByName('p' + intToStr(i)).AsString:= arrFilter[i].edcondition.text;
     SQLQuery.Open;
     for i := 0 to Length(arrString) - 1 do
     begin
-      DBGrid.Columns[i].Width := arrWight[i];
-      DBGrid.Columns[i].Title.Caption := arrString[i];
+          DBGrid.Columns[i].Width := arrWight[i];
+          DBGrid.Columns[i].Title.Caption := arrString[i];
     end;
   except
     on E: Exception do
@@ -197,20 +185,75 @@ begin
   end;
 end;
 
-procedure TDBForm.BtnDeleteClick(Sender: TObject);
+procedure TDBForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  DBGrid.DataSource.DataSet.Delete;
+  SQLTransaction.Commit;
+end;
 
+procedure TDBForm.BtnDeleteClick(Sender: TObject);
+var
+  i, butval: integer;
+  b: Boolean;
+  SQL: TSQLQuery;
+begin
+  b := true;
+  for i := 0 to High(arrCard) do
+      if (arrCard[i].Table = idTable.name) and
+        (arrCard[i].ID = DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger) then
+        begin
+          b := false;
+          ShowMessage('Эта запись уже редактируется!');
+        end;
+
+    if b then
+    begin
+     ButVal:= messagedlg('Вы точно хотите удалить запись?', mtCustom, [mbYes,mbNo], 0);
+     if ButVal = 6 then
+     begin
+       SQL := TSQLQuery.Create(nil);
+       SQL.Transaction := SQLTransaction;
+       SQL.SQL.Text:= 'DELETE FROM ' + idTable.name + ' WHERE ' + 'ID = :p0';
+       SQL.Params[0].AsInteger:= DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
+       SQL.ExecSQL;
+       SQL.Free;
+       FormContainer.UpdateContent;
+     end;
+    end;
 end;
 
 procedure TDBForm.BtnCorrectClick(Sender: TObject);
+var
+  c: TCard;
+  i: integer;
+  b: Boolean;
 begin
+  b := true;
+  for i := 0 to High(arrCard) do
+    if (arrCard[i].Table = idTable.name) and
+      (arrCard[i].ID = DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger) then
+      begin
+        b := false;
+        ShowMessage('Эта запись уже редактируется!');
+      end;
 
+  if b then
+  begin
+    c := TCard.Create(self);
+    c.NewCard(idTable, DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger);
+    c.Show();
+    SetLength(arrCard, Length(arrCard) + 1);
+    arrCard[High(arrCard)].Table := idTable.name;
+    arrCard[High(arrCard)].id := DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
+  end;
 end;
 
 procedure TDBForm.BtnPluseClick(Sender: TObject);
+var
+  c: TCard;
 begin
-
+  c := TCard.Create(self);
+  c.NewCard(idTable, -1);
+  c.Show();
 end;
 
 procedure TDBForm.NewFilter;
@@ -230,7 +273,8 @@ begin
     cbfilter.Height := 20;
     cbfilter.Width := 100;
     cbfilter.Left := 10;
-    cbfilter.Caption := 'Фильтр';
+    cbfilter.Caption := '';
+    cbfilter.ReadOnly := True;
     for i := 0 to Length(idTable.fileds) - 1 do
     begin
       if idTable.fileds[i].link = -1 then
@@ -245,6 +289,7 @@ begin
     cbValue.Height := 20;
     cbValue.Width := 100;
     cbValue.Left := 130;
+    cbValue.ReadOnly := True;
     cbValue.Caption := '';
     cbValue.Items.Add('=');
     cbValue.Items.Add('>');
@@ -295,6 +340,23 @@ begin
     end;
     SetLength(arrFilter, Length(arrFilter) - 1);
   end;
+end;
+
+procedure TDBForm.UpdateContent;
+var
+  i: integer;
+begin
+  SQLTransaction.CommitRetaining;
+  SQLQuery.Close;
+  for i := 0 to Length(arrFilter) - 1 do
+      if (arrFilter[i].cbfilter.caption + arrFilter[i].cbValue.Caption + arrFilter[i].edcondition.text) <> '' then
+          SQLQuery.ParamByName('p' + intToStr(i)).AsString:= arrFilter[i].edcondition.text;
+    SQLQuery.Open;
+    for i := 0 to Length(arrString) - 1 do
+    begin
+          DBGrid.Columns[i].Width := arrWight[i];
+          DBGrid.Columns[i].Title.Caption := arrString[i];
+    end;
 end;
 
 end.

@@ -1,12 +1,14 @@
 object DBDataModule: TDBDataModule
+  OnCreate = DataModuleCreate
   OldCreateOrder = False
   Height = 59
-  HorizontalOffset = 406
-  VerticalOffset = 115
+  HorizontalOffset = 411
+  VerticalOffset = 118
   Width = 272
   object IBConnection: TIBConnection
     Connected = True
     LoginPrompt = False
+    AfterConnect = IBConnectionAfterConnect
     DatabaseName = 'C:\Users\User\Desktop\db\MYDB.FDB'
     KeepConnection = False
     Password = 'masterkey'
