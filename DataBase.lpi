@@ -38,7 +38,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="8">
       <Unit0>
         <Filename Value="DataBase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -81,6 +81,12 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="UFormContainer"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="utimetible.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormTimeTible"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

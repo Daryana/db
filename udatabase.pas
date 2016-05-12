@@ -13,8 +13,6 @@ type
 
   TDBDataModule = class(TDataModule)
     IBConnection: TIBConnection;
-    procedure DataModuleCreate(Sender: TObject);
-    procedure IBConnectionAfterConnect(Sender: TObject);
   private
     { private declarations }
   public
@@ -30,17 +28,6 @@ implementation
 
 { TDBDataModule }
 
-
-
-procedure TDBDataModule.DataModuleCreate(Sender: TObject);
-begin
-
-end;
-
-procedure TDBDataModule.IBConnectionAfterConnect(Sender: TObject);
-begin
-
-end;
 
 end.
 

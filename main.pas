@@ -14,6 +14,7 @@ type
 
   TMyForm = class(TForm)
     MainMenu: TMainMenu;
+    MenuTimeTible: TMenuItem;
     MenuItemTables: TMenuItem;
     MenuItemFile: TMenuItem;
     MenuItemReference: TMenuItem;

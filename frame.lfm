@@ -1,24 +1,24 @@
 object Card: TCard
-  Left = 85
+  Left = 83
   Height = 343
-  Top = 302
-  Width = 524
+  Top = 160
+  Width = 754
   AllowDropFiles = True
   Caption = 'Card'
-  ClientHeight = 343
-  ClientWidth = 524
+  ClientHeight = 0
+  ClientWidth = 0
   Color = clWindow
   OnClose = FormClose
   LCLVersion = '1.6.0.4'
   object Panel: TPanel
     Left = 0
     Height = 64
-    Top = 279
-    Width = 524
+    Top = -64
+    Width = 0
     Align = alBottom
     Caption = ' '
     ClientHeight = 64
-    ClientWidth = 524
+    ClientWidth = 0
     TabOrder = 0
     object BSave: TButton
       Left = 104
@@ -41,9 +41,9 @@ object Card: TCard
   end
   object CPanel: TPanel
     Left = 0
-    Height = 279
+    Height = 0
     Top = 0
-    Width = 524
+    Width = 0
     Align = alClient
     TabOrder = 1
   end
@@ -60,7 +60,8 @@ object Card: TCard
     left = 56
   end
   object SQLTransaction: TSQLTransaction
-    Active = False
+    Active = True
+    Database = DBDataModule.IBConnection
     Options = []
     left = 104
   end

@@ -1,8 +1,8 @@
 object MyForm: TMyForm
-  Left = 10
-  Height = 24
-  Top = 487
-  Width = 305
+  Left = 387
+  Height = 23
+  Top = 416
+  Width = 276
   Caption = 'MyForm'
   Color = clWhite
   Menu = MainMenu
@@ -10,7 +10,6 @@ object MyForm: TMyForm
   LCLVersion = '1.6.0.4'
   object MainMenu: TMainMenu
     left = 16
-    top = 8
     object MenuItemFile: TMenuItem
       Caption = 'Файл'
       object MenuItemExit: TMenuItem
@@ -20,6 +19,9 @@ object MyForm: TMyForm
     end
     object MenuItemTables: TMenuItem
       Caption = 'Таблицы'
+    end
+    object MenuTimeTible: TMenuItem
+      Caption = 'Расписание'
     end
     object MenuItemReference: TMenuItem
       Caption = 'Справка'

@@ -87,10 +87,12 @@ end;
 //-1: не может существовать
 procedure TCard.NewCard(tbl: TTable; id: integer);
 var
-  i: integer;
+  i, j: integer;
   pl: TPanel;
   ed: TDBEdit;
   lb: TLabel;
+  cmb: TDBLookupComboBox;
+  SQL: TSQLQuery;
   s: string;
 begin
   idTable := id;
@@ -141,14 +143,44 @@ begin
     lb.Width := 100;
     lb.Left := 130;
     lb.Caption := tbl.fileds[i].caption;
-    ed := TDBEdit.Create(pl);
-    ed.Parent := pl;
-    ed.Top := 5 + pl.top;
-    ed.Height := 20;
-    ed.Width := 100;
-    ed.Left := 240;
-    ed.DataSource := DataSource;
-    ed.DataField := tbl.fileds[i].name;
+    if tbl.fileds[i].link = -1 then
+    begin
+      ed := TDBEdit.Create(pl);
+      ed.Parent := pl;
+      ed.Top := 5 + pl.top;
+      ed.Height := 20;
+      ed.Width := tbl.fileds[i].fwidth;
+      ed.Left := 240;
+      ed.DataSource := DataSource;
+      ed.DataField := tbl.fileds[i].name;
+    end
+    else
+    begin
+      cmb := TDBLookupComboBox.Create(pl);
+      cmb.Parent := pl;
+      cmb.Top := 5 + pl.top;
+      cmb.Height := 20;
+      cmb.Width := tbl.fileds[i].fwidth;
+      cmb.Left := 240;
+      cmb.DataSource := DataSource;
+      cmb.DataField := tbl.fileds[i].name;
+      cmb.ListSource := TDataSource.Create(pl);
+      SQL := TSQLQuery.Create(pl);
+      SQL.Transaction := SQLTransaction;
+      cmb.ListSource.DataSet := SQL;
+      s := 'SELECT ID, ';
+      for j := 1 to High(TimeTable.Tables[tbl.fileds[i].link].fileds) do
+      begin
+        if j > 1 then s += ' || '' '' || ';
+        s += TimeTable.Tables[tbl.fileds[i].link].fileds[j].name;
+      end;
+      s += ' as name';
+      s += ' FROM ' + TimeTable.Tables[tbl.fileds[i].link].name;
+      SQL.SQL.Text := s;
+      SQL.Open;
+      cmb.ListField := 'name';
+      cmb.KeyField := 'id';
+    end;
   end;
 end;
 

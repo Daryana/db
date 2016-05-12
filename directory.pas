@@ -185,6 +185,7 @@ begin
   end;
 end;
 
+
 procedure TDBForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   SQLTransaction.Commit;

@@ -1,0 +1,52 @@
+object FormTimeTible: TFormTimeTible
+  Left = 184
+  Height = 550
+  Top = 74
+  Width = 898
+  Caption = 'Расписание'
+  ClientHeight = 550
+  ClientWidth = 898
+  Color = clWindow
+  LCLVersion = '1.6.0.4'
+  object Panel: TPanel
+    Left = 0
+    Height = 82
+    Top = 0
+    Width = 898
+    Align = alTop
+    ClientHeight = 82
+    ClientWidth = 898
+    TabOrder = 0
+    object EditX: TEdit
+      Left = 56
+      Height = 23
+      Top = 8
+      Width = 80
+      TabOrder = 0
+    end
+    object EditY: TEdit
+      Left = 56
+      Height = 23
+      Top = 40
+      Width = 80
+      TabOrder = 1
+      Text = ' '
+    end
+    object Label1: TLabel
+      Left = 8
+      Height = 15
+      Top = 8
+      Width = 34
+      Caption = '    X     '
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 8
+      Height = 15
+      Top = 40
+      Width = 31
+      Caption = '    Y    '
+      ParentColor = False
+    end
+  end
+end
