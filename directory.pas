@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, sqldb, db, FileUtil, Forms, Controls, Graphics, Dialogs,
-  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons, frame, UFormContainer;
+  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons, frame, UFormContainer, Grids;
 
 type
 
@@ -53,11 +53,11 @@ type
     arrWight: array of integer;
     SQLText: string;
     idTable: TTable;
-    arrFilter: array of TFilter;
-    procedure NewFilter();
     procedure ButClick(Sender: TObject);
   public
     { public declarations }
+    arrFilter: array of TFilter;
+    procedure NewFilter();
     procedure UpdateContent; override;
   end;
 
@@ -106,18 +106,20 @@ begin
       if b then
         s += TimeTable.Tables[n].name + '.' + TimeTable.Tables[n].fileds[0].name + ', ';
       b := false;
-      for j := 1 to Length(TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].fileds) - 1 do
+      SetLength(arrString, Length(arrString) + 1);
+      arrString[High(arrString)] := TimeTable.Tables[n].fileds[i].caption;
+      SetLength(arrWight, Length(arrWight) + 1);
+      arrWight[High(arrWight)] := TimeTable.Tables[n].fileds[i].fwidth;
+      with TimeTable.Tables[TimeTable.Tables[n].fileds[i].link] do
       begin
-        s += TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].name + '.' + TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].fileds[j].name;
-        if (j <> Length(TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].fileds) - 1) or (i <> Length(TimeTable.Tables[n].fileds) - 1)  then s += ', ';
-        SetLength(arrString, Length(arrString) + 1);
-        arrString[High(arrString)] := TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].fileds[j].caption;
-        SetLength(arrWight, Length(arrWight) + 1);
-        arrWight[High(arrWight)] := TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].fileds[j].fwidth;
+        if i > 1 then s += ' , ';
+        for j := 1 to Length(fileds) - 1 do
+        begin
+          if j > 1 then s += ' || '' '' || ';
+          s += name + '.' + fileds[j].name;
+        end;
+        t += ' INNER JOIN ' + name + ' ON ' + name + '.ID = ' + TimeTable.Tables[n].name + '.' + TimeTable.Tables[n].fileds[i].name;
       end;
-      t += ' INNER JOIN ' + TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].name + ' ON ' +
-           TimeTable.Tables[TimeTable.Tables[n].fileds[i].link].name +
-           '.ID = ' + TimeTable.Tables[n].name + '.' + TimeTable.Tables[n].fileds[i].name;
     end
     else
     begin
@@ -128,16 +130,8 @@ begin
     end;
   if b then s += '*';
   s +=  ' FROM ' + TableName + t;
-  try
-    SQLQuery.SQL.Text := s;
-    UpdateContent;
-  except
-    on E: Exception do
-    begin
-      ShowMessage('Error');
-      self.Close;
-    end;
-  end;
+  SQLQuery.SQL.Text := s;
+  UpdateContent;
   SetLength(arrFilter, 0);
   idTable := TimeTable.Tables[n];
   NewFilter();
@@ -147,7 +141,7 @@ end;
 procedure TDBForm.ButtonClick(Sender: TObject);
 var
   s: string;
-  i: integer;
+  i, j: integer;
 begin
   s := SQLText;
   for i := 0 to Length(arrFilter) - 1 do
@@ -159,8 +153,11 @@ begin
     if idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link = -1 then
       s += idTable.name + '.' + idTable.fileds[arrFilter[i].cbfilter.ItemIndex].name
     else
-      s += TimeTable.Tables[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name + '.' +
-        idTable.fileds[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name;
+    for j := 1 to Length(TimeTable.Tables[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].fileds) - 1 do
+        begin
+          if j > 1 then s += ' || '' '' || ';
+          s += TimeTable.Tables[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].name + '.' + TimeTable.Tables[idTable.fileds[arrFilter[i].cbfilter.ItemIndex].link].fileds[j].name;
+        end;
     s += ' ' + arrFilter[i].cbValue.Caption + ' :p' + inttostr(i);
     end;
   end;
@@ -169,7 +166,7 @@ begin
     SQLQuery.SQL.Text := s;
     for i := 0 to Length(arrFilter) - 1 do
       if (arrFilter[i].cbfilter.caption + arrFilter[i].cbValue.Caption + arrFilter[i].edcondition.text) <> '' then
-          SQLQuery.ParamByName('p' + intToStr(i)).AsString:= arrFilter[i].edcondition.text;
+          SQLQuery.ParamByName('p' + intToStr(i)).AsString := arrFilter[i].edcondition.text;
     SQLQuery.Open;
     for i := 0 to Length(arrString) - 1 do
     begin
@@ -194,32 +191,29 @@ end;
 procedure TDBForm.BtnDeleteClick(Sender: TObject);
 var
   i, butval: integer;
-  b: Boolean;
   SQL: TSQLQuery;
 begin
-  b := true;
   for i := 0 to High(arrCard) do
-      if (arrCard[i].Table = idTable.name) and
-        (arrCard[i].ID = DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger) then
-        begin
-          b := false;
-          ShowMessage('Эта запись уже редактируется!');
-        end;
+    if (arrCard[i].Table = idTable.name) and
+      (arrCard[i].ID = DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger) then
+      begin
+        ShowMessage('Эта запись уже редактируется!');
+        exit;
+      end;
 
-    if b then
-    begin
-     ButVal:= messagedlg('Вы точно хотите удалить запись?', mtCustom, [mbYes,mbNo], 0);
-     if ButVal = 6 then
-     begin
-       SQL := TSQLQuery.Create(nil);
-       SQL.Transaction := SQLTransaction;
-       SQL.SQL.Text:= 'DELETE FROM ' + idTable.name + ' WHERE ' + 'ID = :p0';
-       SQL.Params[0].AsInteger:= DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
-       SQL.ExecSQL;
-       SQL.Free;
-       FormContainer.UpdateContent;
-     end;
-    end;
+  ButVal:= messagedlg('Вы точно хотите удалить запись?', mtCustom, [mbYes,mbNo], 0);
+  if ButVal = mrYes then
+  begin
+    SQL := TSQLQuery.Create(nil);
+    SQL.Transaction := SQLTransaction;
+    SQL.SQL.Text:= 'DELETE FROM ' + idTable.name + ' WHERE ' + 'ID = :p0';
+    SQL.Params[0].AsInteger:= DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
+    SQL.ExecSQL;
+    SQLQuery.ApplyUpdates;
+    SQLTransaction.CommitRetaining;
+    SQL.Free;
+    FormContainer.UpdateContent;
+  end;
 end;
 
 procedure TDBForm.BtnCorrectClick(Sender: TObject);
@@ -277,13 +271,7 @@ begin
     cbfilter.Caption := '';
     cbfilter.ReadOnly := True;
     for i := 0 to Length(idTable.fileds) - 1 do
-    begin
-      if idTable.fileds[i].link = -1 then
-        cbfilter.Items.Add(idTable.fileds[i].caption)
-      else
-        for j := 1 to Length(TimeTable.Tables[idTable.fileds[i].link].fileds) - 1 do
-          cbfilter.Items.Add(TimeTable.Tables[idTable.fileds[i].link].fileds[j].caption)
-    end;
+        cbfilter.Items.Add(idTable.fileds[i].caption);
     cbValue := TCombobox.Create(pl);
     cbValue.Parent := pl;
     cbValue.Top := 5 + pl.top;

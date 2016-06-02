@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, main, metadata, Udatabase, directory, frame, UFormContainer,
-utimetible;
+utimetible, uconflict;
 
 {$R *.res}
 
@@ -17,7 +17,7 @@ begin
   Application.Initialize;
   Application.CreateForm(TMyForm, MyForm);
   Application.CreateForm(TDBDataModule, DBDataModule);
-  Application.CreateForm(TFormTimeTible, FormTimeTible);
+  Application.CreateForm(TFormConflict, FormConflict);
   Application.Run;
 end.
 

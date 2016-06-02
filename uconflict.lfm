@@ -1,0 +1,9 @@
+object FormConflict: TFormConflict
+  Left = 429
+  Height = 240
+  Top = 41
+  Width = 558
+  Caption = 'Конфликты в рассписании'
+  Color = clWindow
+  LCLVersion = '1.6.0.4'
+end

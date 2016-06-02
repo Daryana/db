@@ -51,7 +51,6 @@ implementation
 
 procedure TCard.BSaveClick(Sender: TObject);
 begin
-  //ShowMessage(Datasource.DataSet.Fields.Fields[1].AsString);
   Datasource.DataSet.FieldByName('id').Required := false;
   SQLQuery.Post;
   SQLQuery.ApplyUpdates;
@@ -68,11 +67,13 @@ begin
   begin
     b := False;
     for i := 0 to High(arrCard) - 1 do
-    if (arrCard[i].Table = nameTable) and (arrCard[i].id = idTable) then b := True;
-    if b then
     begin
-      arrCard[i].Table := arrCard[i + 1].Table;
-      arrCard[i].id := arrCard[i + 1].id;
+      if (arrCard[i].Table = nameTable) and (arrCard[i].id = idTable) then b := True;
+      if b then
+      begin
+        arrCard[i].Table := arrCard[i + 1].Table;
+        arrCard[i].id := arrCard[i + 1].id;
+      end;
     end;
     SetLength(arrCard, Length(arrCard) - 1);
   end;

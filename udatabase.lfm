@@ -10,7 +10,7 @@ object DBDataModule: TDBDataModule
     DatabaseName = 'C:\Users\User\Desktop\db\MYDB.FDB'
     KeepConnection = False
     Password = 'masterkey'
-    Transaction = DBForm.SQLTransaction
+    Transaction = FormTimeTable.SQLTransaction
     UserName = 'SYSDBA'
     CharSet = 'UTF8'
     Options = []

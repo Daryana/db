@@ -38,7 +38,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="9">
       <Unit0>
         <Filename Value="DataBase.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -84,9 +84,16 @@
       <Unit7>
         <Filename Value="utimetible.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="FormTimeTible"/>
+        <ComponentName Value="FormTimeTable"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="uconflict.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormConflict"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -109,7 +116,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -119,6 +126,9 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="EDatabaseError"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

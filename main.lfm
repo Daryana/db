@@ -1,7 +1,7 @@
 object MyForm: TMyForm
-  Left = 387
-  Height = 23
-  Top = 416
+  Left = 398
+  Height = 21
+  Top = 202
   Width = 276
   Caption = 'MyForm'
   Color = clWhite
@@ -20,8 +20,9 @@ object MyForm: TMyForm
     object MenuItemTables: TMenuItem
       Caption = 'Таблицы'
     end
-    object MenuTimeTible: TMenuItem
+    object MenuTimeTable: TMenuItem
       Caption = 'Расписание'
+      OnClick = MenuTimeTableClick
     end
     object MenuItemReference: TMenuItem
       Caption = 'Справка'

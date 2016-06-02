@@ -8,6 +8,22 @@ uses
   Classes, SysUtils;
 type
 
+  { TConflictName }
+
+  TConflictName = class
+    Name: string;
+    id: integer;
+    constructor Create(s: string; i: integer);
+  end;
+
+  { TConflict }
+
+  TConflict = class
+    IdField: array of integer;
+    idConflict: integer;
+    constructor Create(s: string; id: integer);
+  end;
+
   { TFiled }
 
   TFiled  = class
@@ -40,11 +56,41 @@ type
 
 var
   TimeTable: TDataBaseList;
+  DataConflicts: array of TConflictName;
   tb: TTable;
   tbs: array of TTable;
   fl: TFiled;
   fls: array of TFiled;
+  Conflicts: array of TConflict;
 implementation
+
+{ TConflict }
+
+constructor TConflict.Create(s: string; id: integer);
+var
+  o: string;
+  i: integer;
+begin
+  idConflict := id;
+  SetLength(IdField, 0);
+  o := '';
+  for i := 1 to Length(s) do
+    if (s[i] = ',') then
+    begin
+      SetLength(IdField, Length(IdField) + 1);
+      IdField[High(IdField)] := StrToInt(o);
+      o := '';
+    end
+    else o += s[i];
+end;
+
+{ TConflicts }
+
+constructor TConflictName.Create(s: string; i: integer);
+begin
+  Name := s;
+  id := i;
+end;
 
 { TDataBaseList }
 
@@ -153,7 +199,7 @@ fl := TFiled.Create('lesson_id', 'Предмет', 1, 300);
 fls[1] := fl;
 fl := TFiled.Create('lesson_type_id', 'Тип занятия', 6, 150);
 fls[2] := fl;
-fl := TFiled.Create('teacher_id', 'Преподаватели', 2, 100);
+fl := TFiled.Create('teacher_id', 'Преподаватели', 2, 300);
 fls[3] := fl;
 fl := TFiled.Create('group_id', 'Группа', 0, 100);
 fls[4] := fl;
@@ -167,5 +213,10 @@ tb := TTable.Create('Рассписание', 'Timetable', fls);
 tbs[7] := tb;
 
 TimeTable := TDataBaseList.Create(tbs);
+
+SetLength(DataConflicts, 2);
+
+DataConflicts[0] := TConflictName.Create('У группы несколько пар в одно и то же время', 0);
+DataConflicts[1] := TConflictName.Create('В аудитории несколько разных преподователей', 1);
 end.
 

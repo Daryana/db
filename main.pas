@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, sqldb, db, FileUtil, Forms, Controls,
-  Graphics, Dialogs, Menus, DBGrids, Metadata, Udatabase, Directory, frame;
+  Graphics, Dialogs, Menus, DBGrids, Metadata, Udatabase, Directory, frame, utimetible;
 
 type
 
@@ -14,7 +14,7 @@ type
 
   TMyForm = class(TForm)
     MainMenu: TMainMenu;
-    MenuTimeTible: TMenuItem;
+    MenuTimeTable: TMenuItem;
     MenuItemTables: TMenuItem;
     MenuItemFile: TMenuItem;
     MenuItemReference: TMenuItem;
@@ -23,6 +23,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
+    procedure MenuTimeTableClick(Sender: TObject);
     procedure tablesClick(Sender: TObject);
   private
     { private declarations }
@@ -68,6 +69,15 @@ end;
 procedure TMyForm.MenuItemExitClick(Sender: TObject);
 begin
   MyForm.Close;
+end;
+
+procedure TMyForm.MenuTimeTableClick(Sender: TObject);
+var
+  t: TFormTimeTable;
+begin
+  t := TFormTimeTable.Create(self);
+  t.NewTimeTable();
+  t.Show();
 end;
 
 procedure TMyForm.tablesClick(Sender: TObject);
