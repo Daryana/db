@@ -214,9 +214,18 @@ tbs[7] := tb;
 
 TimeTable := TDataBaseList.Create(tbs);
 
-SetLength(DataConflicts, 2);
-
+SetLength(DataConflicts, 10);
 DataConflicts[0] := TConflictName.Create('У группы несколько пар в одно и то же время', 0);
 DataConflicts[1] := TConflictName.Create('В аудитории несколько разных преподователей', 1);
+DataConflicts[2] := TConflictName.Create('Группа в нескольких кабинетах одновременно', 2);
+DataConflicts[3] := TConflictName.Create('Группа на нескольких видах занятия одновременно', 3);
+DataConflicts[4] := TConflictName.Create('Группа занимается с несколькими преподавателями одновременно', 4);
+DataConflicts[5] := TConflictName.Create('Преподаватель в нескольких кабинетах одновременно', 5);
+DataConflicts[6] := TConflictName.Create('Преподаватель ведет несколько разных дисциплин одновременно', 6);
+DataConflicts[7] := TConflictName.Create('Преподаватель ведет несколько разных форм занятий одновременно', 7);
+DataConflicts[8] := TConflictName.Create('В кабинете преподают несколько дисциплин одновременно', 8);
+DataConflicts[9] := TConflictName.Create('В кабинете ведутся несколько занятий разных форм одновременно', 9);
+
+
 end.
 

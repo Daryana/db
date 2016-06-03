@@ -6,13 +6,14 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, Grids, DbCtrls, Menus, Metadata, UFormContainer, sqldb, db, directory, Buttons, math, uconflict;
+  StdCtrls, Grids, DbCtrls, Menus, Metadata, UFormContainer, sqldb, db, directory, Buttons, math, uconflict, frame;
 
 type
   fielTable = record
     text: array of string;
     id: integer;
     frect: TRect;
+
     AvailabilityConflict: boolean;
     IdConflict: array of integer;
   end;
@@ -61,8 +62,11 @@ type
     procedure DrawGridMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure DrawGridStartDrag(Sender: TObject; var DragObject: TDragObject);
+    procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure PaintBoxMouseLeave(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
+    procedure PaintBoxStartDrag(Sender: TObject; var DragObject: TDragObject);
   private
     { private declarations }
     referenceX: array of string;
@@ -87,40 +91,50 @@ var
   i, j, s, k, z: integer;
 begin
   size.y := 5;
-  for i := 0 to High(cell) do
+  if Length(cell) = 0 then
   begin
-    s := cRect.Right;
-    for j := 0 to High(cell[i].text) do
+    canvas.Rectangle(cRect.Left + 75, cRect.Top + 25, cRect.Left + 125,cRect.Top + 75);
+    canvas.Pen.Color := clGreen;
+    canvas.Pen.Width := 5;
+    canvas.Line(cRect.Left + 100, cRect.Top + 25, cRect.Left + 99,cRect.Top + 74);
+    canvas.Line(cRect.Left + 75, cRect.Top + 50, cRect.Left + 124,cRect.Top + 49);
+  end
+  else
+    for i := 0 to High(cell) do
     begin
-      canvas.TextOut(cRect.Left, cRect.Top + i * 20 + (j + High(cell[i].text) * i) * 15, ' ' + cell[i].text[j]);
-      s := max(canvas.TextWidth('  ' + cell[i].text[j]) + cRect.Left, s);
+      s := cRect.Right;
+      for j := 0 to High(cell[i].text) do
+      begin
+        canvas.TextOut(cRect.Left, cRect.Top + i * 20 + (j + High(cell[i].text) * i) * 15, ' ' + cell[i].text[j]);
+        s := max(canvas.TextWidth('  ' + cell[i].text[j]) + cRect.Left, s);
+      end;
+      cell[i].frect.Left := cRect.Left;
+      cell[i].frect.Top := cRect.Top + i * 20 + j * i * 15;
+      cell[i].frect.Right := s + 5;
+      cell[i].frect.Bottom := cell[i].frect.Top + (j + 1) * 15;
+      start.x := cRect.Left;
+      start.y := cRect.Top + 100;
+      size.y += cell[i].frect.Bottom - cell[i].frect.Top;
+      size.x := max(s - cell[i].frect.Left, size.x);
+      cell[i].AvailabilityConflict := False;
+      SetLength(cell[i].IdConflict, 0);
+      for k := 0 to High(Conflicts) do
+        for z := 0 to High(Conflicts[k].IdField) do
+          if cell[i].id = Conflicts[k].IdField[z] then
+          begin
+            cell[i].AvailabilityConflict := true;
+            SetLength(cell[i].IdConflict, Length(cell[i].IdConflict) + 1);
+            cell[i].IdConflict[High(cell[i].IdConflict)] := Conflicts[k].idConflict;
+          end;
+      canvas.Brush.Style := bsClear;
+      if cell[i].AvailabilityConflict then
+      begin
+        canvas.Brush.Style := bsBDiagonal;
+        canvas.Brush.Color := clAqua;
+      end;
+      canvas.Rectangle(cell[i].frect);
+      canvas.Brush.Style := bsClear;
     end;
-    cell[i].frect.Left := cRect.Left;
-    cell[i].frect.Top := cRect.Top + i * 20 + j * i * 15;
-    cell[i].frect.Right := s + 5;
-    cell[i].frect.Bottom := cell[i].frect.Top + (j + 1) * 15;
-    start.x := cRect.Left;
-    start.y := cRect.Top + 100;
-    size.y += cell[i].frect.Bottom - cell[i].frect.Top;
-    size.x := max(s - cell[i].frect.Left, size.x);
-    cell[i].AvailabilityConflict := False;
-    SetLength(cell[i].IdConflict, 0);
-    for k := 0 to High(Conflicts) do
-      for z := 0 to High(Conflicts[k].IdField) do
-        if cell[i].id = Conflicts[k].IdField[z] then
-        begin
-          cell[i].AvailabilityConflict := true;
-          SetLength(cell[i].IdConflict, Length(cell[i].IdConflict) + 1);
-          cell[i].IdConflict[High(cell[i].IdConflict)] := Conflicts[k].idConflict;
-        end;
-    canvas.Brush.Style := bsClear;
-    if cell[i].AvailabilityConflict then
-    begin
-      canvas.Brush.Style := bsBDiagonal;
-      canvas.Brush.Color := clAqua;
-    end;
-    canvas.Rectangle(cell[i].frect);
-  end;
 end;
 
 { TFormTimeTable }
@@ -133,12 +147,14 @@ begin
     canvas.Brush.Style := bsClear;
     canvas.Rectangle(arect);
     DrawGrid.Canvas.TextOut(aRect.TopLeft.x, aRect.TopLeft.y, referenceY[aRow - 1]);
+    exit();
   end;
   if (aRow = 0) and (aCol > 0) then
   begin
     canvas.Brush.Style := bsClear;
     canvas.Rectangle(arect);
     DrawGrid.Canvas.TextOut(aRect.TopLeft.x, aRect.TopLeft.y, referenceX[aCol - 1]);
+    exit();
   end;
   if (aCol > 0) and (aRow > 0) then
    FieldCeils[aCol - 1][aRow - 1].Draw(DrawGrid.Canvas, aRect);
@@ -171,6 +187,13 @@ begin
   end;
 end;
 
+
+procedure TFormTimeTable.PaintBoxMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  PaintBox.BeginDrag(False, 5);
+end;
+
 procedure TFormTimeTable.PaintBoxMouseLeave(Sender: TObject);
 begin
   DrawPanel.Visible := false;
@@ -185,6 +208,18 @@ begin
   c := TCell(pb.Tag);
   pb.Canvas.Rectangle(0, 0, pb.Width, pb.Height);
   c.Draw(pb.Canvas, Rect(0, 0, pb.Width, pb.Height));
+end;
+
+procedure TFormTimeTable.PaintBoxStartDrag(Sender: TObject;
+  var DragObject: TDragObject);
+var
+  c, r, i: integer;
+  cl: TCell;
+begin
+  cl := TCell(PaintBox.Tag);
+    for i := 0 to high(cl.cell) do
+      if (MousePos.y < cl.cell[i].frect.Bottom) and (MousePos.y > cl.cell[i].frect.Top) then
+        DragId := cl.cell[i].id;
 end;
 
 
@@ -206,26 +241,40 @@ procedure TFormTimeTable.DrawGridClick(Sender: TObject);
 var
   i, c, r: integer;
   fCon: fielTable;
+  cr: TCard;
 begin
   CMemo.Lines.Clear;
   if ((DrawGrid.Col > 0) and (DrawGrid.Row > 0)) then
   begin
     c := DrawGrid.Col;
     r := DrawGrid.Row;
-    for i := 0 to high(FieldCeils[c - 1][r - 1].cell) do
-      if (MousePos.y < FieldCeils[c - 1][r - 1].cell[i].frect.Bottom) and (MousePos.y > FieldCeils[c - 1][r - 1].cell[i].frect.Top) then
-        fCon := FieldCeils[DrawGrid.Col - 1][DrawGrid.Row - 1].cell[i];
-    if fCon.AvailabilityConflict then
-      for i := 0 to High(fCon.IdConflict) do
-        CMemo.Lines.Add(inttostr(i + 1) + '. ' + DataConflicts[fCon.IdConflict[i]].Name);
-    PaintBox.Visible := True;
-    DrawPanel.Visible := True;
-    DrawPanel.Left := FieldCeils[c - 1][r - 1].start.x;
-    DrawPanel.Top := FieldCeils[c - 1][r - 1].start.y;
-    DrawPanel.Width := FieldCeils[c - 1][r - 1].size.x;
-    DrawPanel.Height := FieldCeils[c - 1][r - 1].size.y;
-    PaintBox.Tag := PtrInt(FieldCeils[c - 1][r - 1]);
-    PaintBox.Invalidate;
+    if  Length(FieldCeils[c - 1][r - 1].cell) = 0 then
+    begin
+      if (MousePos.x < c * DrawGrid.ColWidths[c] + 125) and (MousePos.x > c * DrawGrid.ColWidths[c] + 75)
+        and (MousePos.y < r * DrawGrid.RowHeights[r] + 75) and (MousePos.y > r * DrawGrid.RowHeights[r] + 25) then
+        begin
+          cr := TCard.Create(nil);
+          cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], -1);
+          cr.Show();
+        end;
+    end
+    else
+    begin
+      for i := 0 to high(FieldCeils[c - 1][r - 1].cell) do
+        if (MousePos.y < FieldCeils[c - 1][r - 1].cell[i].frect.Bottom) and (MousePos.y > FieldCeils[c - 1][r - 1].cell[i].frect.Top) then
+          fCon := FieldCeils[DrawGrid.Col - 1][DrawGrid.Row - 1].cell[i];
+      if fCon.AvailabilityConflict then
+        for i := 0 to High(fCon.IdConflict) do
+          CMemo.Lines.Add(inttostr(i + 1) + '. ' + DataConflicts[fCon.IdConflict[i]].Name);
+      PaintBox.Visible := True;
+      DrawPanel.Visible := True;
+      DrawPanel.Left := FieldCeils[c - 1][r - 1].start.x;
+      DrawPanel.Top := FieldCeils[c - 1][r - 1].start.y;
+      DrawPanel.Width := FieldCeils[c - 1][r - 1].size.x;
+      DrawPanel.Height := FieldCeils[c - 1][r - 1].size.y;
+      PaintBox.Tag := PtrInt(FieldCeils[c - 1][r - 1]);
+      PaintBox.Invalidate;
+    end;
   end;
 end;
 
@@ -240,7 +289,6 @@ begin
   f.arrFilter[High(f.arrFilter)].edcondition.Text := referenceX[DrawGrid.Col - 1];
   f.arrFilter[High(f.arrFilter)].cbValue.ItemIndex := 0;
   f.arrFilter[High(f.arrFilter)].pl.Visible := False;
-  //НЕЗАБЫДЬ ВЫНЕСТИ ПОВТОРЯЮЩИЙСЯ КОД!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   f.NewFilter();
   f.arrFilter[High(f.arrFilter)].cbfilter.ItemIndex := ComboBoxY.ItemIndex + 1;
   f.arrFilter[High(f.arrFilter)].edcondition.Text := referenceY[DrawGrid.Row - 1];
@@ -257,7 +305,7 @@ var
   c, r: integer;
   s: string;
 begin
-  DrawGrid.MouseToCell(MousePos.x, MousePos.y, c, r);
+  DrawGrid.MouseToCell(x, y, c, r);
   s :=  'UPDATE ' + TimeTable.Tables[High(TimeTable.Tables)].name + ' set '+
     TimeTable.Tables[High(TimeTable.Tables)].fileds[ComboBoxX.ItemIndex + 1].name + ' = ' + inttostr(c) + ' , ' +
     TimeTable.Tables[High(TimeTable.Tables)].fileds[ComboBoxY.ItemIndex + 1].name + ' = ' + inttostr(r) +
@@ -265,8 +313,6 @@ begin
   SQLQuery.Close;
   SQLQuery.SQL.Text := s;
   SQLQuery.ExecSQL;
-  //SQLQuery.Post;
-  //SQLQuery.ApplyUpdates;
   SQLTransaction.CommitRetaining;
   GenTableText();
 end;
@@ -277,7 +323,7 @@ procedure TFormTimeTable.DrawGridDragOver(Sender, Source: TObject; X,
   c, r: integer;
 begin
   DrawGrid.MouseToCell(MousePos.x, MousePos.y, c, r);
-  Accept := (Sender = Source) and (c > 0) and (r > 0);
+  Accept := (c > 0) and (r > 0);
 end;
 
 procedure TFormTimeTable.GenTableText;

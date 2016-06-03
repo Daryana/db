@@ -4,16 +4,16 @@ object DBForm: TDBForm
   Top = 81
   Width = 764
   Caption = 'DBForm'
-  ClientHeight = 468
-  ClientWidth = 764
+  ClientHeight = 0
+  ClientWidth = 0
   Color = clWindow
   OnClose = FormClose
   LCLVersion = '1.6.0.4'
   object DBGrid: TDBGrid
     Left = 0
-    Height = 344
+    Height = 0
     Top = 0
-    Width = 764
+    Width = 0
     Align = alClient
     Color = clWindow
     Columns = <>
@@ -24,15 +24,15 @@ object DBForm: TDBForm
   object Panel: TPanel
     Left = 0
     Height = 124
-    Top = 344
-    Width = 764
+    Top = -124
+    Width = 0
     Align = alBottom
     Caption = ' '
     ClientHeight = 124
-    ClientWidth = 764
+    ClientWidth = 0
     TabOrder = 1
     object PanelSort: TPanel
-      Left = 608
+      Left = -155
       Height = 122
       Top = 1
       Width = 155
@@ -79,7 +79,7 @@ object DBForm: TDBForm
       end
     end
     object FPanel: TPanel
-      Left = 1
+      Left = 0
       Height = 122
       Top = 1
       Width = 607
