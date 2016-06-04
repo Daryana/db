@@ -18,6 +18,7 @@ type
     DataSource: TDataSource;
     Panel: TPanel;
     CPanel: TPanel;
+    SQLTransaction: TSQLTransaction;
     SQLQuery: TSQLQuery;
     procedure BExitClick(Sender: TObject);
     procedure BSaveClick(Sender: TObject);
@@ -54,8 +55,8 @@ begin
   SQLQuery.Post;
   SQLQuery.ApplyUpdates;
   FormContainer.UpdateContent;
-  if idTable = -1 then SQLQuery.Append
-  else SQLQuery.Edit;
+  if idTable = -1 then SQLQuery.Append;
+  SQLQuery.Edit;
   FormContainer.UpdateContent;
   close;
 end;
@@ -177,7 +178,7 @@ begin
       cmb.ReadOnly := True;
       cmb.ListSource := TDataSource.Create(pl);
       SQL := TSQLQuery.Create(pl);
-      SQL.Transaction := DBDataModule.SQLTransaction;
+      SQL.Transaction := SQLTransaction;
       cmb.ListSource.DataSet := SQL;
       s := 'SELECT ID, ';
       for j := 1 to High(TimeTable.Tables[tbl.fileds[i].link].fileds) do
@@ -189,15 +190,14 @@ begin
       s += ' FROM ' + TimeTable.Tables[tbl.fileds[i].link].name;
       SQL.SQL.Text := s;
       SQL.Open;
+      SQLQuery.Edit;
       cmb.ListField := 'name';
       cmb.KeyField := 'id';
       if (i = tblx) or (i = tbly) then
       begin
-        if i = tblx then
-          //cmb.ItemIndex := vx - 1;
-        if i = tbly then
-          cmb.ItemIndex := vy - 1;
-        //cmb.Enabled := False;
+        if id = -1 then
+          cmb.Enabled := False;
+        cmb.ItemIndex := i - 1;
       end;
     end;
   end;
@@ -205,7 +205,7 @@ end;
 
 procedure TCard.UpdateContent;
 begin
-  DBDataModule.SQLTransaction.CommitRetaining;
+  SQLTransaction.CommitRetaining;
   SQLQuery.Close;
   SQLQuery.Open;
 end;

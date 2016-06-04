@@ -1,7 +1,7 @@
 object MyForm: TMyForm
-  Left = 404
+  Left = 411
   Height = 21
-  Top = 205
+  Top = 209
   Width = 276
   Caption = 'MyForm'
   Color = clWhite

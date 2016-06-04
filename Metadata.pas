@@ -209,7 +209,7 @@ fl := TFiled.Create('weekday_id', 'Неделя', 5, 100);
 fls[6] := fl;
 fl := TFiled.Create('lesson_time_id', 'Время Занятия', 4, 200);
 fls[7] := fl;
-tb := TTable.Create('Рассписание', 'Timetable', fls);
+tb := TTable.Create('Расписание', 'Timetable', fls);
 tbs[7] := tb;
 
 TimeTable := TDataBaseList.Create(tbs);

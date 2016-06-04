@@ -39,6 +39,7 @@ type
     FPanel: TPanel;
     PanelSort: TPanel;
     SQLQuery: TSQLQuery;
+    SQLTransaction1: TSQLTransaction;
     procedure BtnCorrectClick(Sender: TObject);
     procedure BtnDeleteClick(Sender: TObject);
     procedure BtnPluseClick(Sender: TObject);

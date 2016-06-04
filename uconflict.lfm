@@ -1,7 +1,7 @@
 object FormConflict: TFormConflict
-  Left = 429
+  Left = 358
   Height = 240
-  Top = 41
+  Top = 45
   Width = 558
   Caption = 'Конфликты в рассписании'
   Color = clWindow

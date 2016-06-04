@@ -1,7 +1,7 @@
 object Card: TCard
-  Left = 55
+  Left = 9
   Height = 343
-  Top = 240
+  Top = 253
   Width = 754
   AllowDropFiles = True
   Caption = 'Card'
@@ -48,9 +48,24 @@ object Card: TCard
     TabOrder = 1
   end
   object SQLQuery: TSQLQuery
-    FieldDefs = <>
+    IndexName = 'DEFAULT_ORDER'
+    FieldDefs = <    
+      item
+        Name = 'ID'
+        DataType = ftInteger
+        Precision = -1
+      end    
+      item
+        Name = 'NAME'
+        DataType = ftString
+        Precision = -1
+        Size = 400
+      end>
     Database = DBDataModule.IBConnection
-    Transaction = DBDataModule.SQLTransaction
+    Transaction = SQLTransaction
+    SQL.Strings = (
+      'select * from Lessons'
+    )
     Options = []
     Params = <>
     left = 16
@@ -58,5 +73,11 @@ object Card: TCard
   object DataSource: TDataSource
     DataSet = SQLQuery
     left = 56
+  end
+  object SQLTransaction: TSQLTransaction
+    Active = True
+    Database = DBDataModule.IBConnection
+    Options = []
+    left = 96
   end
 end

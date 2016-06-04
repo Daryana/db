@@ -498,7 +498,8 @@ begin
       FieldCeils[i][j] := TCell.Create;
 
       SetLength(FieldCeils[i][j].cell, 0);
-      while (not Datasource.DataSet.EOF) and (Datasource.DataSet.Fields.Fields[ComboBoxX.ItemIndex + 1].AsString = referenceX[i]) and
+      while (not Datasource.DataSet.EOF) and
+             (Datasource.DataSet.Fields.Fields[ComboBoxX.ItemIndex + 1].AsString = referenceX[i]) and
              (Datasource.DataSet.Fields.Fields[ComboBoxY.ItemIndex + 1].AsString = referenceY[j]) do
       begin
         SetLength(FieldCeils[i][j].cell, Length(FieldCeils[i][j].cell) + 1);
@@ -510,7 +511,8 @@ begin
           begin
             SetLength(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text,
               Length(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text) + 1);
-            FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text[high(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text)] := Datasource.DataSet.Fields.Fields[k].AsString;
+            FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text[high(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text)] :=
+              Datasource.DataSet.Fields.Fields[k].AsString;
           end;
         end;
         Datasource.DataSet.Next;
