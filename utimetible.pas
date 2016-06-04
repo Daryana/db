@@ -34,6 +34,8 @@ type
 
   TFormTimeTable = class(TFormSQL)
     BitBtn: TBitBtn;
+    BtnHtml: TBitBtn;
+    BtnExel: TBitBtn;
     ComboBoxX: TComboBox;
     ComboBoxY: TComboBox;
     DataSource: TDataSource;
@@ -44,7 +46,7 @@ type
     PaintBox: TPaintBox;
     Panel: TPanel;
     DrawPanel: TPanel;
-    PanelF: TPanel;
+    PanelC: TPanel;
     PanelXY: TPanel;
     SQLQuery: TSQLQuery;
     procedure BitBtnClick(Sender: TObject);
@@ -95,7 +97,7 @@ begin
   if Length(cell) = 0 then
   begin
     canvas.Pen.Color := clGreen;
-    canvas.Pen.Width := 3;
+    canvas.Pen.Width := 2;
     canvas.Rectangle(cRect.Left + 75, cRect.Top + 25, cRect.Left + 125,cRect.Top + 75);
     canvas.Line(cRect.Left + 100, cRect.Top + 25, cRect.Left + 99,cRect.Top + 74);
     canvas.Line(cRect.Left + 75, cRect.Top + 50, cRect.Left + 124,cRect.Top + 49);
@@ -236,8 +238,8 @@ var
 begin
   cl := TCell(PaintBox.Tag);
     for i := 0 to high(cl.cell) do
-      if (MousePos.y + DrawPanel.Top - PanelF.Height < cl.cell[i].frect.Bottom) and
-         (MousePos.y + DrawPanel.Top - PanelF.Height > cl.cell[i].frect.Top) then
+      if (MousePos.y + DrawPanel.Top - PanelC.Height < cl.cell[i].frect.Bottom) and
+         (MousePos.y + DrawPanel.Top - PanelC.Height > cl.cell[i].frect.Top) then
             DragId := cl.cell[i].id;
 end;
 
@@ -285,7 +287,7 @@ begin
           fCon := FieldCeils[DrawGrid.Col - 1][DrawGrid.Row - 1].cell[i];
       if fCon.AvailabilityConflict then
         for i := 0 to High(fCon.IdConflict) do
-          CMemo.Lines.Add(inttostr(i + 1) + '. ' +DataConflicts[fCon.IdConflict[i]].Name);
+          CMemo.Lines.Add(DataConflicts[fCon.IdConflict[i]].Name);
       PaintBox.Visible := True;
       DrawPanel.Visible := True;
       DrawPanel.Left := FieldCeils[c - 1][r - 1].start.x;
@@ -305,23 +307,25 @@ var
   i, c, r, butval, id: integer;
   SQL: TSQLQuery;
   cr: TCard;
+  b: boolean;
 begin
-  DrawGrid.MouseToCell(MousePos.x + DrawPanel.Left, MousePos.y + DrawPanel.Top - PanelF.Height, c, r);
+  DrawGrid.MouseToCell(MousePos.x + DrawPanel.Left, MousePos.y + DrawPanel.Top - PanelC.Height, c, r);
   pb := TPaintBox(Sender);
   cl := TCell(pb.Tag);
+  b := false;
   for i := 0 to high(cl.cell) do
   begin
     if (MousePos.x <= pb.Width - 5) and (MousePos.x >= pb.Width - 20) then
     begin
-      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 5) and
-         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 20) then
+      if (MousePos.y + DrawPanel.Top - PanelC.Height >= cl.cell[i].frect.Top + 5) and
+         (MousePos.y + DrawPanel.Top - PanelC.Height <= cl.cell[i].frect.Top + 20) then
          begin
            cr := TCard.Create(nil);
            cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], -1, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
            cr.Show();
          end;
-      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 25) and
-         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 40) then
+      if (MousePos.y + DrawPanel.Top - PanelC.Height >= cl.cell[i].frect.Top + 25) and
+         (MousePos.y + DrawPanel.Top - PanelC.Height <= cl.cell[i].frect.Top + 40) then
          begin
            ButVal:= messagedlg('Вы точно хотите удалить запись?', mtCustom, [mbYes,mbNo], 0);
            if ButVal = mrYes then
@@ -337,23 +341,27 @@ begin
              FormContainer.UpdateContent;
            end;
          end;
-      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 45) and
-         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 60) then
+      if (MousePos.y + DrawPanel.Top - PanelC.Height >= cl.cell[i].frect.Top + 45) and
+         (MousePos.y + DrawPanel.Top - PanelC.Height <= cl.cell[i].frect.Top + 60) then
          begin
-              cr := TCard.Create(nil);
-              cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], cl.cell[i].id, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
-              cr.Show();
+           cr := TCard.Create(nil);
+           cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], cl.cell[i].id, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
+           cr.Show();
          end;
     end
     else
-      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top) and
-         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Bottom) then
-           id := cl.cell[i].id;
+      if (MousePos.y + DrawPanel.Top - PanelC.Height >= cl.cell[i].frect.Top) and
+         (MousePos.y + DrawPanel.Top - PanelC.Height <= cl.cell[i].frect.Bottom) then
+           begin
+             id := i;
+             b := true;
+           end;
   end;
   CMemo.Lines.Clear;
-  if cl.cell[id].AvailabilityConflict then
-  for i := 0 to High(cl.cell[id].IdConflict) do
-    CMemo.Lines.Add(DataConflicts[cl.cell[id].IdConflict[i]].Name);
+  if b then
+    if (cl.cell[id].AvailabilityConflict) then
+     for i := 0 to High(cl.cell[id].IdConflict) do
+       CMemo.Lines.Add(DataConflicts[cl.cell[id].IdConflict[i]].Name);
 end;
 
 procedure TFormTimeTable.DrawGridDblClick(Sender: TObject);
@@ -469,7 +477,8 @@ begin
         if j > 1 then s += ' || '' '' || ';
         s += name + '.' + fileds[j].name;
       end;
-      t += ' INNER JOIN ' + name + ' ON ' + name + '.ID = ' + TimeTable.Tables[High(TimeTable.Tables)].name + '.' + TimeTable.Tables[High(TimeTable.Tables)].fileds[i].name;
+      t += ' INNER JOIN ' + name + ' ON ' + name + '.ID = ' + TimeTable.Tables[High(TimeTable.Tables)].name + '.' +
+        TimeTable.Tables[High(TimeTable.Tables)].fileds[i].name;
     end;
   s += ' as name';
   s +=  ' FROM ' + TimeTable.Tables[High(TimeTable.Tables)].name + t  + ' ORDER BY '
@@ -489,7 +498,8 @@ begin
       FieldCeils[i][j] := TCell.Create;
 
       SetLength(FieldCeils[i][j].cell, 0);
-      while (not Datasource.DataSet.EOF) and (Datasource.DataSet.Fields.Fields[ComboBoxX.ItemIndex + 1].AsString = referenceX[i]) and (Datasource.DataSet.Fields.Fields[ComboBoxY.ItemIndex + 1].AsString = referenceY[j]) do
+      while (not Datasource.DataSet.EOF) and (Datasource.DataSet.Fields.Fields[ComboBoxX.ItemIndex + 1].AsString = referenceX[i]) and
+             (Datasource.DataSet.Fields.Fields[ComboBoxY.ItemIndex + 1].AsString = referenceY[j]) do
       begin
         SetLength(FieldCeils[i][j].cell, Length(FieldCeils[i][j].cell) + 1);
         FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].id := Datasource.DataSet.Fields.Fields[0].AsInteger;
@@ -498,7 +508,8 @@ begin
         begin
           if (k <> ComboBoxX.ItemIndex + 1) and (k <> ComboBoxY.ItemIndex + 1) then
           begin
-            SetLength(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text, Length(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text) + 1);
+            SetLength(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text,
+              Length(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text) + 1);
             FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text[high(FieldCeils[i][j].cell[High(FieldCeils[i][j].cell)].text)] := Datasource.DataSet.Fields.Fields[k].AsString;
           end;
         end;

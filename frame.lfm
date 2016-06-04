@@ -5,20 +5,20 @@ object Card: TCard
   Width = 754
   AllowDropFiles = True
   Caption = 'Card'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 343
+  ClientWidth = 754
   Color = clWindow
   OnClose = FormClose
   LCLVersion = '1.6.0.4'
   object Panel: TPanel
     Left = 0
     Height = 64
-    Top = -64
-    Width = 0
+    Top = 279
+    Width = 754
     Align = alBottom
     Caption = ' '
     ClientHeight = 64
-    ClientWidth = 0
+    ClientWidth = 754
     TabOrder = 0
     object BSave: TButton
       Left = 104
@@ -41,9 +41,9 @@ object Card: TCard
   end
   object CPanel: TPanel
     Left = 0
-    Height = 0
+    Height = 279
     Top = 0
-    Width = 0
+    Width = 754
     Align = alClient
     TabOrder = 1
   end

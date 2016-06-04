@@ -20,9 +20,6 @@ type
     procedure NewConflict;
   end;
 
-var
-  FormConflict: TFormConflict;
-
 implementation
 
 {$R *.lfm}

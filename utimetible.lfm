@@ -1,31 +1,31 @@
 object FormTimeTable: TFormTimeTable
-  Left = 55
+  Left = -7
   Height = 656
-  Top = 31
-  Width = 766
+  Top = 40
+  Width = 1362
   Caption = 'Расписание'
-  ClientHeight = 656
-  ClientWidth = 766
+  ClientHeight = 0
+  ClientWidth = 0
   Color = clWindow
   LCLVersion = '1.6.0.4'
   object Panel: TPanel
     Left = 0
     Height = 98
     Top = 0
-    Width = 766
+    Width = 0
     Align = alTop
     ClientHeight = 98
-    ClientWidth = 766
+    ClientWidth = 0
     TabOrder = 0
     object PanelXY: TPanel
-      Left = 1
+      Left = 0
       Height = 96
       Top = 1
-      Width = 167
+      Width = 215
       Align = alLeft
       Caption = ' '
       ClientHeight = 96
-      ClientWidth = 167
+      ClientWidth = 215
       TabOrder = 0
       object LabelX: TLabel
         Left = 8
@@ -63,32 +63,46 @@ object FormTimeTable: TFormTimeTable
         Style = csDropDownList
         TabOrder = 1
       end
+      object BtnHtml: TBitBtn
+        Left = 168
+        Height = 40
+        Top = 8
+        Width = 43
+        TabOrder = 2
+      end
+      object BtnExel: TBitBtn
+        Left = 168
+        Height = 40
+        Top = 48
+        Width = 43
+        TabOrder = 3
+      end
     end
-    object PanelF: TPanel
-      Left = 168
+    object PanelC: TPanel
+      Left = 0
       Height = 96
       Top = 1
-      Width = 597
+      Width = 0
       Align = alClient
       Caption = ' '
       ClientHeight = 96
-      ClientWidth = 597
+      ClientWidth = 0
       TabOrder = 1
       object BitBtn: TBitBtn
-        Left = 1
+        Left = 0
         Height = 24
         Top = 75
-        Width = 595
+        Width = 0
         Align = alTop
         Caption = 'Конфликты'
         OnClick = BitBtnClick
         TabOrder = 0
       end
       object CMemo: TMemo
-        Left = 1
+        Left = 0
         Height = 74
         Top = 1
-        Width = 595
+        Width = 0
         Align = alTop
         ReadOnly = True
         TabOrder = 1
@@ -97,9 +111,9 @@ object FormTimeTable: TFormTimeTable
   end
   object DrawGrid: TDrawGrid
     Left = 0
-    Height = 558
-    Top = 98
-    Width = 766
+    Height = 0
+    Top = 0
+    Width = 0
     Align = alClient
     AutoEdit = False
     ColCount = 1

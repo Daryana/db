@@ -174,6 +174,7 @@ begin
       cmb.Left := 240;
       cmb.DataSource := DataSource;
       cmb.DataField := tbl.fileds[i].name;
+      cmb.ReadOnly := True;
       cmb.ListSource := TDataSource.Create(pl);
       SQL := TSQLQuery.Create(pl);
       SQL.Transaction := DBDataModule.SQLTransaction;
@@ -193,7 +194,7 @@ begin
       if (i = tblx) or (i = tbly) then
       begin
         if i = tblx then
-          cmb.ItemIndex := vx - 1;
+          //cmb.ItemIndex := vx - 1;
         if i = tbly then
           cmb.ItemIndex := vy - 1;
         //cmb.Enabled := False;

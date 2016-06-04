@@ -17,7 +17,6 @@ begin
   Application.Initialize;
   Application.CreateForm(TMyForm, MyForm);
   Application.CreateForm(TDBDataModule, DBDataModule);
-  Application.CreateForm(TFormConflict, FormConflict);
   Application.Run;
 end.
 
