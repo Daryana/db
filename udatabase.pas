@@ -13,6 +13,7 @@ type
 
   TDBDataModule = class(TDataModule)
     IBConnection: TIBConnection;
+    SQLTransaction: TSQLTransaction;
   private
     { private declarations }
   public
@@ -27,6 +28,7 @@ implementation
 {$R *.lfm}
 
 { TDBDataModule }
+
 
 
 end.

@@ -1,8 +1,8 @@
 object DBDataModule: TDBDataModule
   OldCreateOrder = False
   Height = 59
-  HorizontalOffset = 411
-  VerticalOffset = 118
+  HorizontalOffset = 416
+  VerticalOffset = 121
   Width = 272
   object IBConnection: TIBConnection
     Connected = True
@@ -10,11 +10,18 @@ object DBDataModule: TDBDataModule
     DatabaseName = 'C:\Users\User\Desktop\db\MYDB.FDB'
     KeepConnection = False
     Password = 'masterkey'
-    Transaction = FormTimeTable.SQLTransaction
+    Transaction = SQLTransaction
     UserName = 'SYSDBA'
     CharSet = 'UTF8'
     Options = []
     left = 48
+    top = 8
+  end
+  object SQLTransaction: TSQLTransaction
+    Active = False
+    Database = IBConnection
+    Options = []
+    left = 152
     top = 8
   end
 end

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, sqldb, db, FileUtil, Forms, Controls, Graphics, Dialogs,
-  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons, frame, UFormContainer, Grids;
+  DBGrids, ExtCtrls, Metadata, StdCtrls, Buttons, frame, UFormContainer, Grids, Udatabase;
 
 type
 
@@ -39,7 +39,6 @@ type
     FPanel: TPanel;
     PanelSort: TPanel;
     SQLQuery: TSQLQuery;
-    SQLTransaction: TSQLTransaction;
     procedure BtnCorrectClick(Sender: TObject);
     procedure BtnDeleteClick(Sender: TObject);
     procedure BtnPluseClick(Sender: TObject);
@@ -185,7 +184,7 @@ end;
 
 procedure TDBForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  SQLTransaction.Commit;
+  DBDataModule.SQLTransaction.Commit;
 end;
 
 procedure TDBForm.BtnDeleteClick(Sender: TObject);
@@ -205,12 +204,12 @@ begin
   if ButVal = mrYes then
   begin
     SQL := TSQLQuery.Create(nil);
-    SQL.Transaction := SQLTransaction;
+    SQL.Transaction := DBDataModule.SQLTransaction;
     SQL.SQL.Text:= 'DELETE FROM ' + idTable.name + ' WHERE ' + 'ID = :p0';
     SQL.Params[0].AsInteger:= DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
     SQL.ExecSQL;
     SQLQuery.ApplyUpdates;
-    SQLTransaction.CommitRetaining;
+    DBDataModule.SQLTransaction.CommitRetaining;
     SQL.Free;
     FormContainer.UpdateContent;
   end;
@@ -236,9 +235,6 @@ begin
     c := TCard.Create(self);
     c.NewCard(idTable, DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger);
     c.Show();
-    SetLength(arrCard, Length(arrCard) + 1);
-    arrCard[High(arrCard)].Table := idTable.name;
-    arrCard[High(arrCard)].id := DBGrid.DataSource.DataSet.FieldByName(DBGrid.Columns[0].FieldName).AsInteger;
   end;
 end;
 
@@ -335,7 +331,7 @@ procedure TDBForm.UpdateContent;
 var
   i: integer;
 begin
-  SQLTransaction.CommitRetaining;
+  DBDataModule.SQLTransaction.CommitRetaining;
   SQLQuery.Close;
   for i := 0 to Length(arrFilter) - 1 do
       if (arrFilter[i].cbfilter.caption + arrFilter[i].cbValue.Caption + arrFilter[i].edcondition.text) <> '' then

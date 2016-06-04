@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, Grids, DbCtrls, Menus, Metadata, UFormContainer, sqldb, db, directory, Buttons, math, uconflict, frame;
+  StdCtrls, Grids, DbCtrls, Menus, Metadata, UFormContainer, sqldb, db, directory, Buttons, math, uconflict, frame, Udatabase;
 
 type
   fielTable = record
@@ -32,7 +32,7 @@ type
 
   { TFormTimeTable }
 
-  TFormTimeTable = class(TForm)
+  TFormTimeTable = class(TFormSQL)
     BitBtn: TBitBtn;
     ComboBoxX: TComboBox;
     ComboBoxY: TComboBox;
@@ -47,10 +47,10 @@ type
     PanelF: TPanel;
     PanelXY: TPanel;
     SQLQuery: TSQLQuery;
-    SQLTransaction: TSQLTransaction;
     procedure BitBtnClick(Sender: TObject);
     procedure ComboBoxChange(Sender: TObject);
     procedure DrawGridClick(Sender: TObject);
+    procedure PaintBoxClick(Sender: TObject);
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure DrawGridDragOver(Sender, Source: TObject; X, Y: Integer;
@@ -78,6 +78,7 @@ type
   public
     { public declarations }
     procedure NewTimeTable();
+    procedure UpdateContent; override;
   end;
 
 implementation
@@ -93,9 +94,9 @@ begin
   size.y := 5;
   if Length(cell) = 0 then
   begin
-    canvas.Rectangle(cRect.Left + 75, cRect.Top + 25, cRect.Left + 125,cRect.Top + 75);
     canvas.Pen.Color := clGreen;
-    canvas.Pen.Width := 5;
+    canvas.Pen.Width := 3;
+    canvas.Rectangle(cRect.Left + 75, cRect.Top + 25, cRect.Left + 125,cRect.Top + 75);
     canvas.Line(cRect.Left + 100, cRect.Top + 25, cRect.Left + 99,cRect.Top + 74);
     canvas.Line(cRect.Left + 75, cRect.Top + 50, cRect.Left + 124,cRect.Top + 49);
   end
@@ -203,11 +204,28 @@ procedure TFormTimeTable.PaintBoxPaint(Sender: TObject);
 var
   c: TCell;
   pb: TPaintBox;
+  i: integer;
 begin
   pb := TPaintBox(Sender);
   c := TCell(pb.Tag);
   pb.Canvas.Rectangle(0, 0, pb.Width, pb.Height);
+  pb.Canvas.Pen.Color := clBlack;
+  pb.Canvas.Pen.Width := 1;
   c.Draw(pb.Canvas, Rect(0, 0, pb.Width, pb.Height));
+  for i := 0 to high(c.cell) do
+  begin
+    pb.Canvas.Pen.Width := 2;
+    pb.Canvas.Pen.Color := clGreen;
+    pb.Canvas.Rectangle(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 5, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 20);
+    pb.Canvas.line(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 13, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 13);
+    pb.Canvas.line(pb.Left + pb.Width - 13 ,c.cell[i].frect.Top + 5, pb.Left + pb.Width - 13 ,c.cell[i].frect.Top + 20);
+    pb.Canvas.Pen.Color := clRed;
+    pb.Canvas.Rectangle(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 25, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 40);
+    pb.Canvas.line(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 33, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 33);
+    pb.Canvas.Pen.Color := clBlue;
+    pb.Canvas.Rectangle(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 45, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 60);
+    pb.Canvas.Ellipse(pb.Left + pb.Width - 20 ,c.cell[i].frect.Top + 45, pb.Left + pb.Width - 5 ,c.cell[i].frect.Top + 60);
+  end;
 end;
 
 procedure TFormTimeTable.PaintBoxStartDrag(Sender: TObject;
@@ -218,8 +236,9 @@ var
 begin
   cl := TCell(PaintBox.Tag);
     for i := 0 to high(cl.cell) do
-      if (MousePos.y < cl.cell[i].frect.Bottom) and (MousePos.y > cl.cell[i].frect.Top) then
-        DragId := cl.cell[i].id;
+      if (MousePos.y + DrawPanel.Top - PanelF.Height < cl.cell[i].frect.Bottom) and
+         (MousePos.y + DrawPanel.Top - PanelF.Height > cl.cell[i].frect.Top) then
+            DragId := cl.cell[i].id;
 end;
 
 
@@ -250,12 +269,13 @@ begin
     r := DrawGrid.Row;
     if  Length(FieldCeils[c - 1][r - 1].cell) = 0 then
     begin
-      if (MousePos.x < c * DrawGrid.ColWidths[c] + 125) and (MousePos.x > c * DrawGrid.ColWidths[c] + 75)
-        and (MousePos.y < r * DrawGrid.RowHeights[r] + 75) and (MousePos.y > r * DrawGrid.RowHeights[r] + 25) then
+      if (MousePos.x < DrawGrid.CellRect(c, r).Left + 125) and (MousePos.x > DrawGrid.CellRect(c, r).Left + 75)then
+        if (MousePos.y < DrawGrid.CellRect(c, r).Top + 75) and (MousePos.y > DrawGrid.CellRect(c, r).Top + 25) then
         begin
           cr := TCard.Create(nil);
-          cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], -1);
+          cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], -1, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
           cr.Show();
+
         end;
     end
     else
@@ -265,17 +285,75 @@ begin
           fCon := FieldCeils[DrawGrid.Col - 1][DrawGrid.Row - 1].cell[i];
       if fCon.AvailabilityConflict then
         for i := 0 to High(fCon.IdConflict) do
-          CMemo.Lines.Add(inttostr(i + 1) + '. ' + DataConflicts[fCon.IdConflict[i]].Name);
+          CMemo.Lines.Add(inttostr(i + 1) + '. ' +DataConflicts[fCon.IdConflict[i]].Name);
       PaintBox.Visible := True;
       DrawPanel.Visible := True;
       DrawPanel.Left := FieldCeils[c - 1][r - 1].start.x;
       DrawPanel.Top := FieldCeils[c - 1][r - 1].start.y;
-      DrawPanel.Width := FieldCeils[c - 1][r - 1].size.x;
+      DrawPanel.Width := FieldCeils[c - 1][r - 1].size.x + 25;
       DrawPanel.Height := FieldCeils[c - 1][r - 1].size.y;
       PaintBox.Tag := PtrInt(FieldCeils[c - 1][r - 1]);
       PaintBox.Invalidate;
     end;
   end;
+end;
+
+procedure TFormTimeTable.PaintBoxClick(Sender: TObject);
+var
+  cl: TCell;
+  pb: TPaintBox;
+  i, c, r, butval, id: integer;
+  SQL: TSQLQuery;
+  cr: TCard;
+begin
+  DrawGrid.MouseToCell(MousePos.x + DrawPanel.Left, MousePos.y + DrawPanel.Top - PanelF.Height, c, r);
+  pb := TPaintBox(Sender);
+  cl := TCell(pb.Tag);
+  for i := 0 to high(cl.cell) do
+  begin
+    if (MousePos.x <= pb.Width - 5) and (MousePos.x >= pb.Width - 20) then
+    begin
+      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 5) and
+         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 20) then
+         begin
+           cr := TCard.Create(nil);
+           cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], -1, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
+           cr.Show();
+         end;
+      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 25) and
+         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 40) then
+         begin
+           ButVal:= messagedlg('Вы точно хотите удалить запись?', mtCustom, [mbYes,mbNo], 0);
+           if ButVal = mrYes then
+           begin
+             SQL := TSQLQuery.Create(nil);
+             SQL.Transaction := DBDataModule.SQLTransaction;
+             SQL.SQL.Text:= 'DELETE FROM ' + TimeTable.Tables[High(TimeTable.Tables)].name + ' WHERE ' + 'ID = :p0';
+             SQL.Params[0].AsInteger:= cl.cell[i].id;
+             SQL.ExecSQL;
+             SQLQuery.ApplyUpdates;
+             DBDataModule.SQLTransaction.CommitRetaining;
+             SQL.Free;
+             FormContainer.UpdateContent;
+           end;
+         end;
+      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top + 45) and
+         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Top + 60) then
+         begin
+              cr := TCard.Create(nil);
+              cr.NewCard(TimeTable.Tables[High(TimeTable.Tables)], cl.cell[i].id, ComboBoxX.ItemIndex + 1, ComboBoxY.ItemIndex + 1, c, r);
+              cr.Show();
+         end;
+    end
+    else
+      if (MousePos.y + DrawPanel.Top - PanelF.Height >= cl.cell[i].frect.Top) and
+         (MousePos.y + DrawPanel.Top - PanelF.Height <= cl.cell[i].frect.Bottom) then
+           id := cl.cell[i].id;
+  end;
+  CMemo.Lines.Clear;
+  if cl.cell[id].AvailabilityConflict then
+  for i := 0 to High(cl.cell[id].IdConflict) do
+    CMemo.Lines.Add(DataConflicts[cl.cell[id].IdConflict[i]].Name);
 end;
 
 procedure TFormTimeTable.DrawGridDblClick(Sender: TObject);
@@ -313,7 +391,7 @@ begin
   SQLQuery.Close;
   SQLQuery.SQL.Text := s;
   SQLQuery.ExecSQL;
-  SQLTransaction.CommitRetaining;
+  DBDataModule.SQLTransaction.CommitRetaining;
   GenTableText();
 end;
 
@@ -323,7 +401,8 @@ procedure TFormTimeTable.DrawGridDragOver(Sender, Source: TObject; X,
   c, r: integer;
 begin
   DrawGrid.MouseToCell(MousePos.x, MousePos.y, c, r);
-  Accept := (c > 0) and (r > 0);
+  Accept := (Sender = Source) and(c > 0) and (r > 0);
+  if Sender <> Source then Accept := True;
 end;
 
 procedure TFormTimeTable.GenTableText;
@@ -449,6 +528,14 @@ begin
   ComboBoxY.ItemIndex := 6;
   SetLength(Conflicts, 0);
   GenTableText();
+end;
+
+procedure TFormTimeTable.UpdateContent;
+begin
+  DBDataModule.SQLTransaction.CommitRetaining;
+  SQLQuery.Close;
+  SQLQuery.Open;
+  GenTableText;
 end;
 
 end.

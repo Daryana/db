@@ -92,6 +92,7 @@
         <Filename Value="uconflict.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormConflict"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit8>
     </Units>

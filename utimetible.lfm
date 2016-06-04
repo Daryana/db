@@ -1,21 +1,21 @@
 object FormTimeTable: TFormTimeTable
-  Left = -7
+  Left = 55
   Height = 656
-  Top = 28
-  Width = 1206
+  Top = 31
+  Width = 766
   Caption = 'Расписание'
   ClientHeight = 656
-  ClientWidth = 1206
+  ClientWidth = 766
   Color = clWindow
   LCLVersion = '1.6.0.4'
   object Panel: TPanel
     Left = 0
     Height = 98
     Top = 0
-    Width = 1206
+    Width = 766
     Align = alTop
     ClientHeight = 98
-    ClientWidth = 1206
+    ClientWidth = 766
     TabOrder = 0
     object PanelXY: TPanel
       Left = 1
@@ -68,26 +68,29 @@ object FormTimeTable: TFormTimeTable
       Left = 168
       Height = 96
       Top = 1
-      Width = 1037
+      Width = 597
       Align = alClient
       Caption = ' '
       ClientHeight = 96
-      ClientWidth = 1037
+      ClientWidth = 597
       TabOrder = 1
       object BitBtn: TBitBtn
-        Left = 0
+        Left = 1
         Height = 24
-        Top = 72
-        Width = 1038
+        Top = 75
+        Width = 595
+        Align = alTop
         Caption = 'Конфликты'
         OnClick = BitBtnClick
         TabOrder = 0
       end
       object CMemo: TMemo
-        Left = 0
+        Left = 1
         Height = 74
-        Top = 0
-        Width = 1040
+        Top = 1
+        Width = 595
+        Align = alTop
+        ReadOnly = True
         TabOrder = 1
       end
     end
@@ -96,7 +99,7 @@ object FormTimeTable: TFormTimeTable
     Left = 0
     Height = 558
     Top = 98
-    Width = 1206
+    Width = 766
     Align = alClient
     AutoEdit = False
     ColCount = 1
@@ -115,29 +118,30 @@ object FormTimeTable: TFormTimeTable
     OnStartDrag = DrawGridStartDrag
   end
   object DrawPanel: TPanel
-    Left = 321
-    Height = 165
-    Top = 247
-    Width = 217
-    ClientHeight = 165
-    ClientWidth = 217
+    Left = 9
+    Height = 121
+    Top = 111
+    Width = 177
+    ClientHeight = 121
+    ClientWidth = 177
     TabOrder = 2
     Visible = False
     object PaintBox: TPaintBox
       Left = 1
-      Height = 163
+      Height = 119
       Top = 1
-      Width = 215
+      Width = 175
       Align = alClient
       Color = clInfoBk
       DragCursor = crHandPoint
       ParentColor = False
       Visible = False
-      OnClick = DrawGridDblClick
+      OnClick = PaintBoxClick
       OnDblClick = DrawGridDblClick
       OnDragDrop = DrawGridDragDrop
       OnMouseDown = PaintBoxMouseDown
       OnMouseLeave = PaintBoxMouseLeave
+      OnMouseMove = DrawGridMouseMove
       OnPaint = PaintBoxPaint
       OnStartDrag = PaintBoxStartDrag
     end
@@ -161,20 +165,13 @@ object FormTimeTable: TFormTimeTable
         Size = 400
       end>
     Database = DBDataModule.IBConnection
-    Transaction = SQLTransaction
+    Transaction = DBDataModule.SQLTransaction
     SQL.Strings = (
       'SELECT * FROM Lessons'
     )
     Options = []
     Params = <>
     left = 8
-    top = 56
-  end
-  object SQLTransaction: TSQLTransaction
-    Active = False
-    Database = DBDataModule.IBConnection
-    Options = []
-    left = 56
     top = 56
   end
 end

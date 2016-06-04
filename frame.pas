@@ -19,7 +19,6 @@ type
     Panel: TPanel;
     CPanel: TPanel;
     SQLQuery: TSQLQuery;
-    SQLTransaction: TSQLTransaction;
     procedure BExitClick(Sender: TObject);
     procedure BSaveClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -29,7 +28,7 @@ type
     nameTable: string;
   public
     { public declarations }
-    procedure NewCard(tbl: TTable; id: integer);
+    procedure NewCard(tbl: TTable; id: integer; tblx: integer = -1; tbly: integer = -1; vy: integer = -1; vx: integer = -1);
     procedure UpdateContent; override;
   end;
 
@@ -54,6 +53,9 @@ begin
   Datasource.DataSet.FieldByName('id').Required := false;
   SQLQuery.Post;
   SQLQuery.ApplyUpdates;
+  FormContainer.UpdateContent;
+  if idTable = -1 then SQLQuery.Append
+  else SQLQuery.Edit;
   FormContainer.UpdateContent;
   close;
 end;
@@ -86,7 +88,8 @@ end;
 
 { TCard }
 //-1: не может существовать
-procedure TCard.NewCard(tbl: TTable; id: integer);
+procedure TCard.NewCard(tbl: TTable; id: integer; tblx: integer; tbly: integer;
+  vy: integer; vx: integer);
 var
   i, j: integer;
   pl: TPanel;
@@ -98,6 +101,12 @@ var
 begin
   idTable := id;
   nameTable := tbl.name;
+  if id > -1 then
+  begin
+    SetLength(arrCard, Length(arrCard) + 1);
+    arrCard[High(arrCard)].Table := nameTable;
+    arrCard[High(arrCard)].id := idTable;
+  end;
   self.Caption := tbl.caption;
   s :=  'SELECT ';
   for i := 0 to  Length(tbl.fileds) - 1 do
@@ -167,7 +176,7 @@ begin
       cmb.DataField := tbl.fileds[i].name;
       cmb.ListSource := TDataSource.Create(pl);
       SQL := TSQLQuery.Create(pl);
-      SQL.Transaction := SQLTransaction;
+      SQL.Transaction := DBDataModule.SQLTransaction;
       cmb.ListSource.DataSet := SQL;
       s := 'SELECT ID, ';
       for j := 1 to High(TimeTable.Tables[tbl.fileds[i].link].fileds) do
@@ -181,17 +190,23 @@ begin
       SQL.Open;
       cmb.ListField := 'name';
       cmb.KeyField := 'id';
+      if (i = tblx) or (i = tbly) then
+      begin
+        if i = tblx then
+          cmb.ItemIndex := vx - 1;
+        if i = tbly then
+          cmb.ItemIndex := vy - 1;
+        //cmb.Enabled := False;
+      end;
     end;
   end;
 end;
 
 procedure TCard.UpdateContent;
 begin
-  SQLTransaction.CommitRetaining;
+  DBDataModule.SQLTransaction.CommitRetaining;
   SQLQuery.Close;
   SQLQuery.Open;
-  if idTable = -1 then SQLQuery.Append
-  else SQLQuery.Edit;
 end;
 
 

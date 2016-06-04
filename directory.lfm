@@ -1,7 +1,7 @@
 object DBForm: TDBForm
-  Left = -7
+  Left = 55
   Height = 468
-  Top = 81
+  Top = 84
   Width = 764
   Caption = 'DBForm'
   ClientHeight = 0
@@ -92,7 +92,7 @@ object DBForm: TDBForm
   object SQLQuery: TSQLQuery
     FieldDefs = <>
     Database = DBDataModule.IBConnection
-    Transaction = FormTimeTable.SQLTransaction
+    Transaction = DBDataModule.SQLTransaction
     SQL.Strings = (
       'SELECT * FROM Lessons'
     )
@@ -103,11 +103,5 @@ object DBForm: TDBForm
   object DataSource: TDataSource
     DataSet = SQLQuery
     left = 24
-  end
-  object SQLTransaction: TSQLTransaction
-    Active = False
-    Database = DBDataModule.IBConnection
-    Options = []
-    left = 160
   end
 end

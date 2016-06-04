@@ -1,7 +1,7 @@
 object Card: TCard
-  Left = 91
+  Left = 55
   Height = 343
-  Top = 237
+  Top = 240
   Width = 754
   AllowDropFiles = True
   Caption = 'Card'
@@ -50,7 +50,7 @@ object Card: TCard
   object SQLQuery: TSQLQuery
     FieldDefs = <>
     Database = DBDataModule.IBConnection
-    Transaction = FormTimeTable.SQLTransaction
+    Transaction = DBDataModule.SQLTransaction
     Options = []
     Params = <>
     left = 16
@@ -58,11 +58,5 @@ object Card: TCard
   object DataSource: TDataSource
     DataSet = SQLQuery
     left = 56
-  end
-  object SQLTransaction: TSQLTransaction
-    Active = False
-    Database = DBDataModule.IBConnection
-    Options = []
-    left = 104
   end
 end
